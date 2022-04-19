@@ -7,6 +7,7 @@ using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using StockManagement.db;
 
 namespace StockManagement
 {
@@ -18,15 +19,17 @@ namespace StockManagement
             "User id=Admin;Password=Bore$48abs;Server=.;Initial Catalog=StockManagement;";
 
         private SqlConnection _connection;
-        private bool isCorrectUserName = false;
-        private bool isCorrectPassword = false;
-        private string password = "";
+        private bool _isCorrectUserName = false;
+        private bool _isCorrectPassword = false;
+        private string _password = "";
         protected void Page_Load(object sender, EventArgs e)
         {
             _connection = new SqlConnection(ConnectionString);
             _connection.Open();
-            isCorrectPassword = false;
-            isCorrectUserName = false;
+            _isCorrectPassword = false;
+            _isCorrectUserName = false;
+            Session["username"] = null;
+            Session["uid"] = null;
         }
 
         protected void btnCreateAccountOnClick(object sender, EventArgs e)
@@ -36,37 +39,32 @@ namespace StockManagement
 
         protected void btn_Login_Click(object sender, EventArgs e)
         {
-            if(isCorrectUserName && isCorrectPassword)
-            {
-                Response.Redirect("Home.aspx");
-            }
+            if (!_isCorrectUserName || !_isCorrectPassword) return;
+            Session["uid"] = DBHelper.Helper.GetUserId(txt_Username.Text);
+            Session["username"] = txt_Username.Text;
+            Response.Redirect("Home.aspx");
         }
 
         protected void UserNameValidator_ServerValidate(object source, ServerValidateEventArgs args)
         {
-            var command = new SqlCommand(UserSelectQuery, _connection);
-            command.Parameters.AddWithValue("@Name", txt_Username.Text);
-            var reader = command.ExecuteReader();
-            if (reader.HasRows && reader.Read())
+            if (DBHelper.Helper.IsUsernameExists(txt_Username.Text))
             {
-                isCorrectUserName = true;
-                password = reader[0].ToString();
-                Application["Uid"] = Int32.Parse(reader[1].ToString());
+                _isCorrectUserName = true;
                 args.IsValid = true;
             }
             else
             {
                 args.IsValid = false;
             }
-            reader.Close();
         }
 
         protected void PasswordValidator_ServerValidate(object source, ServerValidateEventArgs args)
         {
-            if (password.Equals(txt_password.Text))
+            _password = DBHelper.Helper.GetPassword(txt_Username.Text);
+            if (_password.Equals(txt_password.Text))
             {
                 args.IsValid=true;
-                isCorrectPassword = true;
+                _isCorrectPassword = true;
             }
             else
             {
