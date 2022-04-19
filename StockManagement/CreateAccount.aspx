@@ -24,7 +24,7 @@
         <label for="psw"><b>Re enter Password</b></label>
         <asp:TextBox runat="server" ID="txt_re_password" TextMode="Password" placeholder="Re enter Password"></asp:TextBox>
         <center><asp:Button runat="server" ID="btn_Login" CssClass="lgnbtn btn btn-secondary w-100" OnClick="btnLoginOnClick" Text="Continue" /></center>
-        <center><asp:Button runat="server" ID="GotoLoginPage" class="cnbtn btn btn-dark w-100" OnClick="GotoLoginPage_Click" Text="Create an account"></asp:Button></center>
+        <center><asp:Button runat="server" ID="GotoLoginPage" class="cnbtn btn btn-dark w-100" OnClick="GotoLoginPage_Click" Text="Already have an account?"></asp:Button></center>
          <asp:RequiredFieldValidator ID="UsernameRequireValidator" 
             runat="server" ControlToValidate="txt_Username" 
             ErrorMessage="Enter the username" ForeColor="Red" Display="Dynamic"></asp:RequiredFieldValidator>

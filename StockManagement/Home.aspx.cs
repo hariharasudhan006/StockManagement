@@ -5,23 +5,17 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using StockManagement.db;
 
 namespace StockManagement
 {
     public partial class Home : System.Web.UI.Page
     {
-        private const string ConnectionString =
-            "User id=Admin;Password=Bore$48abs;Server=.;Initial Catalog=StockManagement;";
-
-        private const string SelectQuery = @"select Stock.id, Product.id, Product.Name, Product.pricePerUnit, Stock.price, Manufacturer.name 
-from ((Stock INNER JOIN Product on Stock.id = Product.stockId and Stock.userId = @uid) INNER JOIN Manufacturer on Stock.manufactorerId = Manufacturer.id);";
-
-        private SqlConnection _connection;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                if(Application["Uid"] == null)
+                if(Session["uid"] == null)
                 {
                     Response.Redirect("Login.aspx");
                 }
@@ -29,8 +23,6 @@ from ((Stock INNER JOIN Product on Stock.id = Product.stockId and Stock.userId =
             {
                 Response.Redirect("Login.aspx");
             }
-            _connection = new SqlConnection(ConnectionString);
-            _connection.Open();
             ShowGridView();
         }
 
@@ -39,11 +31,9 @@ from ((Stock INNER JOIN Product on Stock.id = Product.stockId and Stock.userId =
             return false;
         }
 
-        protected void ShowGridView()
+        private void ShowGridView()
         {
-            var command = new SqlCommand(SelectQuery, _connection);
-            command.Parameters.AddWithValue("@uid", Application["Uid"]);
-            var reader = command.ExecuteReader();
+            var reader = DBHelper.Helper.GetHomePageTable(Session["uid"].ToString());
             if (reader.HasRows)
             {
                 ContentGrid.DataSource = reader;
@@ -58,15 +48,13 @@ from ((Stock INNER JOIN Product on Stock.id = Product.stockId and Stock.userId =
 
         protected void ContentGrid_RowDataBound(object sender, GridViewRowEventArgs e)
         {
-            if (e.Row.RowType == DataControlRowType.Header)
-            {
-                e.Row.Cells[0].Text = "Stock ID";
-                e.Row.Cells[1].Text = "Product ID";
-                e.Row.Cells[2].Text = "Product name";
-                e.Row.Cells[3].Text = "Price per product";
-                e.Row.Cells[4].Text = "stock price";
-                e.Row.Cells[5].Text = "Manufacturer name";
-            }
+            if (e.Row.RowType != DataControlRowType.Header) return;
+            e.Row.Cells[0].Text = "Stock ID";
+            e.Row.Cells[1].Text = "Product ID";
+            e.Row.Cells[2].Text = "Product name";
+            e.Row.Cells[3].Text = "Price per product";
+            e.Row.Cells[4].Text = "stock price";
+            e.Row.Cells[5].Text = "Manufacturer name";
         }
     }
 }
